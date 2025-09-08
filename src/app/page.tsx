@@ -8,6 +8,7 @@ import ApplicationsTracker from "@/components/applications-tracker";
 import AiChatAssistant from "@/components/ai-chat-assistant";
 import InvestorNetwork from "@/components/investor-network";
 import FinancialAnalysisSection from "@/components/financial-analysis";
+import NextGenFeatures from "@/components/next-gen-features";
 
 type NavKey =
   | "dashboard"
@@ -17,6 +18,7 @@ type NavKey =
   | "analysis"
   | "assistant"
   | "community"
+  | "nextgen"
   | "settings";
 
 export default function Page() {
@@ -38,6 +40,8 @@ export default function Page() {
         return "AI Assistant";
       case "community":
         return "Community Hub";
+      case "nextgen":
+        return "Next-Gen Features";
       case "settings":
         return "Settings";
       default:
@@ -53,7 +57,7 @@ export default function Page() {
           onSelect={(key) => setActive(key as NavKey)}
           user={{
             name: "Alex Morgan",
-            welcomeMessage: "Let’s secure your next round",
+            welcomeMessage: "Let's secure your next round",
             avatarUrl:
               "https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=256&auto=format&fit=crop&ixlib=rb-4.0.3",
           }}
@@ -147,6 +151,12 @@ export default function Page() {
                     </div>
                   </div>
                 </section>
+              </div>
+            )}
+
+            {active === "nextgen" && (
+              <div className="space-y-6">
+                <NextGenFeatures />
               </div>
             )}
 

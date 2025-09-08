@@ -43,6 +43,7 @@ const NAV_ITEMS: NavConfig[] = [
   { key: "analysis", label: "Financial Analysis", icon: <AlignVerticalDistributeStart className="h-5 w-5" aria-hidden="true" /> },
   { key: "assistant", label: "AI Assistant", icon: <CircleEllipsis className="h-5 w-5" aria-hidden="true" /> },
   { key: "community", label: "Community Hub", icon: <SquareDashedTopSolid className="h-5 w-5" aria-hidden="true" /> },
+  { key: "nextgen", label: "Next-Gen", icon: <CircleEllipsis className="h-5 w-5" aria-hidden="true" /> },
   { key: "settings", label: "Settings", icon: <PanelRightClose className="h-5 w-5" aria-hidden="true" /> },
 ];
 
