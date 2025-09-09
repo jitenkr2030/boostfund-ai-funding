@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import SidebarNavigation from "@/components/sidebar-navigation";
 import DashboardOverviewSection from "@/components/dashboard-overview";
 import FundingOpportunities from "@/components/funding-opportunities";
@@ -24,6 +25,7 @@ type NavKey =
   | "settings";
 
 export default function Page() {
+  const router = useRouter();
   const [active, setActive] = React.useState<NavKey>("dashboard");
 
   const title = React.useMemo(() => {
@@ -53,12 +55,25 @@ export default function Page() {
     }
   }, [active]);
 
+  const handleSelect = (key: string) => {
+    const k = key as NavKey;
+    const gated = k === "applications" || k === "analysis";
+    if (gated) {
+      const token = typeof window !== "undefined" ? localStorage.getItem("bearer_token") : null;
+      if (!token) {
+        router.push(`/login?next=${k}`);
+        return;
+      }
+    }
+    setActive(k);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex">
         <SidebarNavigation
           activeKey={active}
-          onSelect={(key) => setActive(key as NavKey)}
+          onSelect={(key) => handleSelect(key as string)}
           user={{
             name: "Alex Morgan",
             welcomeMessage: "Let's secure your next round",
