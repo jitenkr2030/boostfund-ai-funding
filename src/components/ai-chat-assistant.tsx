@@ -72,7 +72,7 @@ const STORAGE_KEY = "boostfund:ai-chat:v1"
 
 export default function AiChatAssistant({
   className,
-  initialMessages = [],
+  initialMessages,
   title = "AI Funding Assistant",
   layout = "section",
   enableVoice = true,
@@ -133,7 +133,7 @@ export default function AiChatAssistant({
       if (raw) {
         const parsed = JSON.parse(raw) as ChatMessage[]
         setMessages(parsed)
-      } else if (initialMessages.length) {
+      } else if (initialMessages?.length) {
         setMessages(initialMessages)
       } else {
         // seed conversation
@@ -148,11 +148,11 @@ export default function AiChatAssistant({
         ])
       }
     } catch {
-      setMessages(initialMessages)
+      setMessages(initialMessages ?? [])
     }
-    // Open widget by default for section layout
+    // Open widget by default for section layout; ensure closed for widget at mount
     if (layout === "widget") setWidgetOpen(false)
-  }, [initialMessages, layout])
+  }, [])
 
   // Persist to localStorage
   useEffect(() => {
@@ -295,14 +295,6 @@ export default function AiChatAssistant({
       },
     ])
   }
-
-  // Widget toggle behavior
-  useEffect(() => {
-    if (layout === "widget") {
-      // ensure safe default closed; opened via FAB
-      // no-op
-    }
-  }, [layout])
 
   return (
     <>
