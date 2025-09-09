@@ -88,7 +88,6 @@ export default function AiChatAssistant({
   const [reminderAt, setReminderAt] = useState<string>("")
   const [reminderNote, setReminderNote] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const scrollRef = useRef<HTMLDivElement | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   // Quick prompts
@@ -143,7 +142,7 @@ export default function AiChatAssistant({
             id: cryptoRandom(),
             role: "assistant",
             content:
-              "Hi! I’m your AI funding assistant. I can help you find grants, refine your pitch, and navigate applications. How can I help today?",
+              "Hi! I'm your AI funding assistant. I can help you find grants, refine your pitch, and navigate applications. How can I help today?",
             createdAt: Date.now(),
           },
         ])
@@ -165,12 +164,6 @@ export default function AiChatAssistant({
       // ignore
     }
   }, [messages])
-
-  // Scroll to bottom on new messages
-  useEffect(() => {
-    if (!scrollRef.current) return
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-  }, [messages, isThinking])
 
   // Voice: setup on-demand
   const canUseVoice = useMemo(() => {
@@ -297,7 +290,7 @@ export default function AiChatAssistant({
       {
         id: cryptoRandom(),
         role: "assistant",
-        content: `I’ll remind you on ${when.toLocaleString()}${reminderNote ? ` about: ${reminderNote}` : ""}.`,
+        content: `I'll remind you on ${when.toLocaleString()}${reminderNote ? ` about: ${reminderNote}` : ""}.`,
         createdAt: Date.now(),
       },
     ])
@@ -410,7 +403,6 @@ export default function AiChatAssistant({
                 onFilesSelected={onFilesSelected}
                 onKeyDown={handleKeyDown}
                 openSchedule={() => setScheduleOpen(true)}
-                scrollRef={scrollRef}
               />
             </div>
           )}
@@ -513,7 +505,6 @@ export default function AiChatAssistant({
             onFilesSelected={onFilesSelected}
             onKeyDown={handleKeyDown}
             openSchedule={() => setScheduleOpen(true)}
-            scrollRef={scrollRef}
           />
         </section>
       )}
@@ -582,7 +573,6 @@ function ChatBody({
 
       <div className="relative">
         <ScrollArea className="h-[380px] md:h-[480px]">
-          <div ref={/* scroll area content for manual scroll control */ undefined} />
           <div className="px-4 pb-4 space-y-4">
             {messages.map((m) => (
               <MessageBubble key={m.id} message={m} />
@@ -609,7 +599,6 @@ function FooterControls({
   onFilesSelected,
   onKeyDown,
   openSchedule,
-  scrollRef,
 }: {
   input: string
   setInput: (v: string) => void
@@ -624,16 +613,7 @@ function FooterControls({
   onFilesSelected: React.ChangeEventHandler<HTMLInputElement>
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
   openSchedule: () => void
-  scrollRef: React.RefObject<HTMLDivElement>
 }) {
-  // Attach scroll ref to the ScrollArea viewport
-  useEffect(() => {
-    const viewport = document.querySelector<HTMLElement>('[data-radix-scroll-area-viewport]')
-    if (viewport) {
-      scrollRef.current = viewport
-    }
-  }, [scrollRef])
-
   return (
     <div className="border-t border-[var(--border)] p-3 sm:p-4">
       <div className="flex items-end gap-2">
@@ -862,7 +842,7 @@ function generateAssistantReply(
 ) {
   const hasFiles = attachments && attachments.length > 0
   if (hasFiles) {
-    return `Thanks for the document${attachments!.length > 1 ? "s" : ""}. I’ll analyze structure, clarity, and alignment with funding criteria. I’ll highlight strengths, gaps, and provide a prioritized revision checklist. Would you like me to focus on budget, impact, or team sections first?`
+    return `Thanks for the document${attachments!.length > 1 ? "s" : ""}. I'll analyze structure, clarity, and alignment with funding criteria. I'll highlight strengths, gaps, and provide a prioritized revision checklist. Would you like me to focus on budget, impact, or team sections first?`
   }
 
   const lower = userInput.toLowerCase()
@@ -870,10 +850,10 @@ function generateAssistantReply(
     return "Here are steps to identify suitable opportunities: 1) Clarify stage, sector, region, and ticket size. 2) Use our Opportunities page to filter by eligibility. 3) Shortlist 5–8 targets and align timelines. I can draft a prioritized list based on your profile—shall I proceed?"
   }
   if (lower.includes("pitch") || lower.includes("deck")) {
-    return "I can review your pitch for narrative, traction, and clarity. Share your deck or paste key sections. I’ll provide slide-by-slide suggestions and a concise investor summary."
+    return "I can review your pitch for narrative, traction, and clarity. Share your deck or paste key sections. I'll provide slide-by-slide suggestions and a concise investor summary."
   }
   if (lower.includes("application")) {
-    return "Let’s work through your application. Which section are you on? I can propose responses, tighten language, and ensure alignment with evaluation criteria."
+    return "Let's work through your application. Which section are you on? I can propose responses, tighten language, and ensure alignment with evaluation criteria."
   }
   return "Got it. I can suggest opportunities, craft outreach, refine your pitch, or guide applications. Tell me your goal and constraints (timeline, target amount, sector, region)."
 }
