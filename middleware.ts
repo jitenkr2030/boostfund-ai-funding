@@ -68,5 +68,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   runtime: "nodejs",
-  matcher: ["/", "/api/:path*"],
+  // Limit middleware to API routes only to avoid blocking the app preview/homepage
+  matcher: ["/api/:path*"],
 };
