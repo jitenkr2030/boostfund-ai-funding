@@ -2,15 +2,36 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import SidebarNavigation from "@/components/sidebar-navigation";
 import DashboardOverviewSection from "@/components/dashboard-overview";
 import FundingOpportunities from "@/components/funding-opportunities";
 import ApplicationsTracker from "@/components/applications-tracker";
-import AiChatAssistant from "@/components/ai-chat-assistant";
-import InvestorNetwork from "@/components/investor-network";
-import FinancialAnalysisSection from "@/components/financial-analysis";
 import NextGenFeatures from "@/components/next-gen-features";
 import PricingPlans from "@/components/pricing-plans";
+
+// Lightweight skeletons for lazy sections
+const SectionSkeleton = () => (
+  <div className="rounded-xl border border-border bg-card p-5 animate-pulse">
+    <div className="h-5 w-40 bg-muted rounded" />
+    <div className="mt-4 h-24 w-full bg-muted/60 rounded" />
+  </div>
+);
+
+const AiChatAssistant = dynamic(() => import("@/components/ai-chat-assistant"), {
+  ssr: false,
+  loading: () => <SectionSkeleton />,
+});
+
+const FinancialAnalysisSection = dynamic(
+  () => import("@/components/financial-analysis"),
+  { ssr: false, loading: () => <SectionSkeleton /> }
+);
+
+const InvestorNetwork = dynamic(() => import("@/components/investor-network"), {
+  ssr: false,
+  loading: () => <SectionSkeleton />,
+});
 
 type NavKey =
   | "dashboard"

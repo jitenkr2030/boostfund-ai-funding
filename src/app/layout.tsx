@@ -5,6 +5,8 @@ import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { EventTracker } from "@/components/EventTracker";
+import SWRProvider from "@/components/SWRProvider";
 
 export const metadata: Metadata = {
   title: "BoostFund AI — Your funding command center",
@@ -44,20 +46,23 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <TooltipProvider delayDuration={200}>
-          <ErrorReporter />
-          <Script
-            src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts//route-messenger.js"
-            strategy="afterInteractive"
-            data-target-origin="*"
-            data-message-type="ROUTE_CHANGE"
-            data-include-search-params="true"
-            data-only-in-iframe="true"
-            data-debug="true"
-            data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
-          />
-          {children}
-          <VisualEditsMessenger />
-          <Toaster />
+          <SWRProvider>
+            <ErrorReporter />
+            <Script
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts//route-messenger.js"
+              strategy="afterInteractive"
+              data-target-origin="*"
+              data-message-type="ROUTE_CHANGE"
+              data-include-search-params="true"
+              data-only-in-iframe="true"
+              data-debug="true"
+              data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
+            />
+            {children}
+            <VisualEditsMessenger />
+            <EventTracker />
+            <Toaster />
+          </SWRProvider>
         </TooltipProvider>
       </body>
     </html>

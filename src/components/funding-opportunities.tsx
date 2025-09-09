@@ -43,6 +43,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebounce } from "@/hooks/use-debounce";
+import useSWR from "swr";
 
 type FundingType = "grant" | "vc" | "angel" | "loan";
 
@@ -210,6 +212,11 @@ export default function FundingOpportunities({
   onApply,
 }: FundingOpportunitiesProps) {
   const [q, setQ] = useState("");
+  const dq = useDebounce(q, 350);
+  // Fetch opportunities from API with SWR (fallback to provided items)
+  const { data: apiItems, isLoading: apiLoading } = useSWR<Opportunity[]>(
+    "/api/opportunities?limit=50",
+  );
   const [type, setType] = useState<FundingType | "all">("all");
   const [industry, setIndustry] = useState<string | "all">("all");
   const [location, setLocation] = useState<string | "all">("all");
@@ -224,8 +231,8 @@ export default function FundingOpportunities({
   const [local, setLocal] = useState<Opportunity[]>(items);
 
   useEffect(() => {
-    setLocal(items);
-  }, [items]);
+    setLocal(apiItems && Array.isArray(apiItems) && apiItems.length > 0 ? apiItems : items);
+  }, [apiItems, items]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -237,13 +244,13 @@ export default function FundingOpportunities({
   }, []);
 
   const suggestions = useMemo(() => {
-    if (!q) return defaultSuggestions.slice(0, 5);
-    const lower = q.toLowerCase();
+    if (!dq) return defaultSuggestions.slice(0, 5);
+    const lower = dq.toLowerCase();
     return defaultSuggestions
       .filter((s) => s.toLowerCase().includes(lower))
-      .concat(q.length > 8 ? [`${q} funding opportunities`] : [])
+      .concat(dq.length > 8 ? [`${dq} funding opportunities`] : [])
       .slice(0, 5);
-  }, [q]);
+  }, [dq]);
 
   const handleSearch = async () => {
     try {
@@ -283,14 +290,14 @@ export default function FundingOpportunities({
         const by = new Date(deadlineBefore).getTime();
         if (new Date(op.deadline).getTime() > by) return false;
       }
-      const qq = q.trim().toLowerCase();
+      const qq = dq.trim().toLowerCase();
       if (qq) {
         const hay = `${op.title} ${op.industry} ${op.location} ${op.eligibility} ${op.description}`.toLowerCase();
         if (!hay.includes(qq)) return false;
       }
       return true;
     });
-  }, [local, tab, type, industry, location, minAmount, maxAmount, deadlineBefore, q]);
+  }, [local, tab, type, industry, location, minAmount, maxAmount, deadlineBefore, dq]);
 
   const onToggleSave = (op: Opportunity) => {
     setLocal((prev) =>
@@ -306,7 +313,7 @@ export default function FundingOpportunities({
     setLocal((prev) => prev.map((o) => (o.id === op.id ? { ...o, applied: true } : o)));
     onApply?.(op);
     toast.success("Application started", {
-      description: "We’ve queued application steps and reminders.",
+      description: "We've queued application steps and reminders.",
     });
   };
 
@@ -362,7 +369,7 @@ export default function FundingOpportunities({
             className="bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90"
             onClick={() => {
               toast("AI assistance ready", {
-                description: "We’ve generated a checklist and draft answers in Applications.",
+                description: "We've generated a checklist and draft answers in Applications.",
               });
             }}
           >
@@ -373,7 +380,7 @@ export default function FundingOpportunities({
             variant="secondary"
             className="bg-[var(--secondary)] hover:bg-[var(--surface-2)]"
             onClick={() => {
-              toast("Reminder set", { description: "We’ll remind you 72 hours before the deadline." });
+              toast("Reminder set", { description: "We'll remind you 72 hours before the deadline." });
             }}
           >
             <CalendarSearch className="mr-2 h-4 w-4" />
@@ -573,7 +580,7 @@ export default function FundingOpportunities({
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {loading
+            {loading || apiLoading
               ? "Searching..."
               : error
               ? "Search error"
@@ -589,7 +596,7 @@ export default function FundingOpportunities({
         <Separator className="bg-[var(--border)]" />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {loading &&
+          {(loading || apiLoading) &&
             Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={`sk-${i}`}
@@ -609,7 +616,7 @@ export default function FundingOpportunities({
               </div>
             ))}
 
-          {!loading && error && (
+          {!loading && !apiLoading && error && (
             <div className="col-span-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-6 text-center">
               <SearchSlash className="mx-auto h-6 w-6 text-[var(--danger)] mb-2" aria-hidden="true" />
               <p className="text-sm text-muted-foreground">{error}</p>
@@ -628,7 +635,7 @@ export default function FundingOpportunities({
             </div>
           )}
 
-          {!loading && !error && !hasResults && (
+          {!loading && !apiLoading && !error && !hasResults && (
             <div className="col-span-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-8 text-center">
               <SearchSlash className="mx-auto h-8 w-8 text-muted-foreground mb-2" aria-hidden="true" />
               <h3 className="font-medium">No matching opportunities</h3>
@@ -636,7 +643,11 @@ export default function FundingOpportunities({
                 Try adjusting filters or using broader keywords.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 justify-center">
-                {["Global", "Grant", "Under 100k"].map((chip) => (
+                {[
+                  "Global",
+                  "Grant",
+                  "Under 100k",
+                ].map((chip) => (
                   <button
                     key={chip}
                     className="text-xs rounded-full border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--surface-2)] px-3 py-1"
@@ -654,7 +665,7 @@ export default function FundingOpportunities({
           )}
 
           {!loading &&
-            !error &&
+            !apiLoading &&
             hasResults &&
             filtered.map((op) => (
               <article
