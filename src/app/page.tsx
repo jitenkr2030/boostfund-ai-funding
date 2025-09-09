@@ -9,6 +9,7 @@ import AiChatAssistant from "@/components/ai-chat-assistant";
 import InvestorNetwork from "@/components/investor-network";
 import FinancialAnalysisSection from "@/components/financial-analysis";
 import NextGenFeatures from "@/components/next-gen-features";
+import PricingPlans from "@/components/pricing-plans";
 
 type NavKey =
   | "dashboard"
@@ -19,6 +20,7 @@ type NavKey =
   | "assistant"
   | "community"
   | "nextgen"
+  | "plans"
   | "settings";
 
 export default function Page() {
@@ -42,6 +44,8 @@ export default function Page() {
         return "Community Hub";
       case "nextgen":
         return "Next-Gen Features";
+      case "plans":
+        return "Plans & Pricing";
       case "settings":
         return "Settings";
       default:
@@ -62,6 +66,7 @@ export default function Page() {
               "https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=256&auto=format&fit=crop&ixlib=rb-4.0.3",
           }}
           defaultCollapsed={false}
+          onUpgradeClick={() => setActive("plans")}
         />
 
         <main className="flex-1 min-w-0">
@@ -157,6 +162,12 @@ export default function Page() {
             {active === "nextgen" && (
               <div className="space-y-6">
                 <NextGenFeatures />
+              </div>
+            )}
+
+            {active === "plans" && (
+              <div className="space-y-6">
+                <PricingPlans />
               </div>
             )}
 
