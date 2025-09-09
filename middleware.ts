@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 
 // Simple in-memory rate limiter (per IP per window)
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
@@ -53,14 +51,6 @@ export async function middleware(request: NextRequest) {
     res.headers.set("X-RateLimit-Remaining", remaining.toString());
     res.headers.set("X-RateLimit-Reset", Math.floor(resetAt / 1000).toString());
     return res;
-  }
-
-  // Preserve existing auth redirect for root page
-  if (pathname === "/") {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
   }
 
   return NextResponse.next();
